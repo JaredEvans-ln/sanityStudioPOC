@@ -1,7 +1,7 @@
 import React from "react";
-import HeroBanner from "../../../components/HeroBanner"; // your real frontend component
+import HeroBanner from "../../components/HeroBanner";
 
-export default function HeroBannerPreview(props) {
+export default function HeroBannerPreview(props: { document: any; }) {
   const { document } = props;
 
   const banner = document.displayed;
