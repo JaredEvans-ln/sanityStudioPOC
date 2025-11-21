@@ -1,6 +1,6 @@
 'use client'
 
-import {createDataAttribute, SanityDocument} from 'next-sanity'
+import {SanityDocument} from 'next-sanity'
 import {useOptimistic} from 'next-sanity/hooks'
 import Link from 'next/link'
 
@@ -33,13 +33,13 @@ function renderSections(pageBuilderSections: PageBuilderSection[], page: GetPage
     return null
   }
 
-  const attr = createDataAttribute({
+  const attr = dataAttr({
     id: page._id,
     type: page._type,
     path: `pageBuilder`,
   })
   return (
-    <div data-sanity={attr()}>
+    <div data-sanity={attr.toString()}>
       {pageBuilderSections.map((block: any, index: number) => (
         <BlockRenderer
           key={block._key}

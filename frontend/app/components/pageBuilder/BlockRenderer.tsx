@@ -4,7 +4,7 @@ import CallToAction from '@/app/components/pageBuilder/blockComponents/CallToAct
 import InfoSection from '@/app/components/pageBuilder/blockComponents/InfoSection'
 import ContactForm from './blockComponents/ContactForm'
 import Announcements from './blockComponents/Announcements'
-import {createDataAttribute} from 'next-sanity'
+import {dataAttr} from '@/sanity/lib/utils'
 
 type BlocksType = {
   [key: string]: React.FC<any>
@@ -36,13 +36,13 @@ export default function BlockRenderer({block, index, pageId, pageType}: BlockPro
   // Block does exist
 
   if (typeof Blocks[block._type] !== 'undefined') {
-    const attr = createDataAttribute({
+    const attr = dataAttr({
       id: pageId,
       type: pageType,
       path: `pageBuilder[_key=="${block._key}"]`,
     })
     return (
-      <div key={block._key} data-sanity={attr()}>
+      <div key={block._key} data-sanity={attr.toString()}>
         {React.createElement(Blocks[block._type], {
           key: block._key,
           pageId: pageId,
