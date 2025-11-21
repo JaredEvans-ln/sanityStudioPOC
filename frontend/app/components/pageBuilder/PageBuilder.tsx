@@ -1,10 +1,10 @@
 'use client'
 
-import {SanityDocument} from 'next-sanity'
+import {createDataAttribute, SanityDocument} from 'next-sanity'
 import {useOptimistic} from 'next-sanity/hooks'
 import Link from 'next/link'
 
-import BlockRenderer from '@/app/components/BlockRenderer'
+import BlockRenderer from '@/app/components/pageBuilder/BlockRenderer'
 import {GetPageQueryResult} from '@/sanity.types'
 import {dataAttr} from '@/sanity/lib/utils'
 import {studioUrl} from '@/sanity/lib/api'
@@ -32,14 +32,14 @@ function renderSections(pageBuilderSections: PageBuilderSection[], page: GetPage
   if (!page) {
     return null
   }
+
+  const attr = createDataAttribute({
+    id: page._id,
+    type: page._type,
+    path: `pageBuilder`,
+  })
   return (
-    <div
-      data-sanity={dataAttr({
-        id: page._id,
-        type: page._type,
-        path: `pageBuilder`,
-      }).toString()}
-    >
+    <div data-sanity={attr()}>
       {pageBuilderSections.map((block: any, index: number) => (
         <BlockRenderer
           key={block._key}
@@ -60,9 +60,11 @@ function renderEmptyState(page: GetPageQueryResult) {
   return (
     <div className="container">
       <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
-        This page has no content!
+        This page has no page blocks!
       </h1>
-      <p className="mt-2 text-base text-gray-500">Open the page in Sanity Studio to add content.</p>
+      <p className="mt-2 text-base text-gray-500">
+        Open the page in Sanity Studio to add page blocks..
+      </p>
       <div className="mt-10 flex">
         <Link
           className="rounded-full flex gap-2 mr-6 items-center bg-black hover:bg-brand focus:bg-blue py-3 px-6 text-white transition-colors duration-200"

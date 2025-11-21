@@ -18,9 +18,9 @@ export const infoSection = defineType({
       type: 'string',
     }),
     defineField({
-      name: 'content',
-      title: 'Content',
-      type: 'blockContent',
+      name: 'body',
+      title: 'Body',
+      type: 'blockContentTextOnly',
     }),
   ],
   preview: {

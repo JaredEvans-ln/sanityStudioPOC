@@ -6,6 +6,7 @@
  */
 
 import {defineCliConfig} from 'sanity/cli'
+import path from 'path'
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || '<your project ID>'
 const dataset = process.env.SANITY_STUDIO_DATASET || 'production'
@@ -17,4 +18,13 @@ export default defineCliConfig({
   },
   studioHost: process.env.SANITY_STUDIO_STUDIO_HOST || '', // Visit https://www.sanity.io/docs/environment-variables to learn more about using environment variables for local & production.
   autoUpdates: true,
+  vite: (config) => {
+    // Add alias for @shared to resolve to the shared folder
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/shared': path.resolve(__dirname, '../shared'),
+    }
+    return config
+  },
 })

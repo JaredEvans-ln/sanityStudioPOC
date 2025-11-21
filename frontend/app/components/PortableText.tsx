@@ -8,18 +8,60 @@
  *
  */
 
-import {PortableText, type PortableTextComponents, type PortableTextBlock} from 'next-sanity'
-
+import {
+  PortableText,
+  type PortableTextComponents,
+  type PortableTextBlock,
+  createDataAttribute,
+} from 'next-sanity'
 import ResolvedLink from '@/app/components/ResolvedLink'
+import {snakeCaseToTitleCase} from '@/shared/utils/text'
+import CoverImage from './CoverImage'
 
 export default function CustomPortableText({
+  parentId,
+  parentType,
+  parentPath,
   className,
   value,
+  themeName,
+  customTextColor,
 }: {
+  parentId: string
+  parentType: string
+  parentPath: string
   className?: string
   value: PortableTextBlock[]
+  themeName?: string
+  customTextColor?: string
 }) {
   const components: PortableTextComponents = {
+    types: {
+      image: ({value}) => {
+        const attr = createDataAttribute({
+          id: parentId,
+          type: parentType,
+          path: `${parentPath}[_key=="${value?._key}"]`,
+        })
+        if (!value?.asset?._ref) return null
+        return <CoverImage image={value} attribute={attr()} />
+      },
+      planTier: ({value}) => {
+        if (!value) return null
+        return <div>{snakeCaseToTitleCase(value.tier)}</div>
+      },
+      quote: ({value}) => {
+        if (!value) return null
+        return (
+          <div className="border-l-4 border-gray-200 pl-4">
+            <p className="text-lg font-bold">{value.text}</p>
+            <p className="text-sm text-gray-500">
+              {value.attributedTo.firstName} {value.attributedTo.lastName}
+            </p>
+          </div>
+        )
+      },
+    },
     block: {
       h1: ({children, value}) => (
         // Add an anchor to the h1
@@ -82,7 +124,10 @@ export default function CustomPortableText({
   }
 
   return (
-    <div className={['prose prose-a:text-brand', className].filter(Boolean).join(' ')}>
+    <div
+      className={['prose prose-a:text-brand', className].filter(Boolean).join(' ')}
+      style={themeName ? {color: customTextColor} : {}}
+    >
       <PortableText components={components} value={value} />
     </div>
   )

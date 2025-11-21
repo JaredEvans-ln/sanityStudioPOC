@@ -12,9 +12,9 @@ import {defineArrayMember, defineType, defineField} from 'sanity'
  *
  * Learn more: https://www.sanity.io/docs/block-content
  */
-export const blockContent = defineType({
-  title: 'Block Content',
-  name: 'blockContent',
+export const blockContentTextOnly = defineType({
+  title: 'Block Content (Text Only)',
+  name: 'blockContentTextOnly',
   type: 'array',
   of: [
     defineArrayMember({
@@ -91,28 +91,6 @@ export const blockContent = defineType({
           },
         ],
       },
-    }),
-    defineArrayMember({
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
-      fields: [
-        defineField({
-          name: 'alt',
-          title: 'Alternative text',
-          type: 'string',
-        }),
-      ],
-    }),
-    defineArrayMember({
-      type: 'reference',
-      title: 'Plan Tier',
-      to: [{type: 'planTier', title: 'Plan Tier'}],
-    }),
-    defineArrayMember({
-      type: 'quote',
-      title: 'Quote',
     }),
   ],
 })

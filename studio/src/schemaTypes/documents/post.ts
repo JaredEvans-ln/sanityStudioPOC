@@ -12,17 +12,38 @@ export const post = defineType({
   title: 'Post',
   icon: DocumentTextIcon,
   type: 'document',
+  groups: [
+    {
+      name: 'basic',
+      title: 'Basic Information',
+      default: true,
+    },
+    {
+      name: 'content',
+      title: 'Content',
+    },
+    {
+      name: 'media',
+      title: 'Media',
+    },
+    {
+      name: 'metadata',
+      title: 'Metadata',
+    },
+  ],
   fields: [
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
+      group: 'basic',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
+      group: 'basic',
       description: 'A slug is required for the post to show up in the preview',
       options: {
         source: 'title',
@@ -32,19 +53,22 @@ export const post = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'content',
-      title: 'Content',
+      name: 'body',
+      title: 'Post Body',
       type: 'blockContent',
+      group: 'content',
     }),
     defineField({
       name: 'excerpt',
       title: 'Excerpt',
       type: 'text',
+      group: 'content',
     }),
     defineField({
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',
+      group: 'media',
       options: {
         hotspot: true,
         aiAssist: {
@@ -74,13 +98,22 @@ export const post = defineType({
       name: 'date',
       title: 'Date',
       type: 'datetime',
+      group: 'metadata',
       initialValue: () => new Date().toISOString(),
     }),
     defineField({
       name: 'author',
       title: 'Author',
       type: 'reference',
+      group: 'metadata',
       to: [{type: 'person'}],
+    }),
+    defineField({
+      name: 'categories',
+      title: 'Categories',
+      type: 'array',
+      group: 'metadata',
+      of: [{type: 'reference', to: {type: 'category'}}],
     }),
   ],
   // List preview configuration. https://www.sanity.io/docs/previews-list-views

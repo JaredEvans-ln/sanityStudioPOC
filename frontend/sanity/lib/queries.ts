@@ -15,7 +15,7 @@ const postFields = /* groq */ `
 
 const linkReference = /* groq */ `
   _type == "link" => {
-    "page": page->slug.current,
+    "page": coalesce(page->slug.current, '/'),
     "post": post->slug.current
   }
 `
@@ -24,11 +24,31 @@ const linkFields = /* groq */ `
   link {
       ...,
       ${linkReference}
-      }
+      },
 `
 
-export const getPageQuery = defineQuery(`
-  *[_type == 'page' && slug.current == $slug][0]{
+const bodyFragment = /* groq */ `
+  body[]{
+    ...,
+    _type == 'reference' => @->,
+    _type == 'quote' => {
+      ..., 
+      attributedTo->{...}
+    },
+    markDefs[]{
+      ...,
+      ${linkReference}
+    }
+  },
+`
+const buttonFragment = `
+  button {
+    ...,
+    ${linkFields}
+  },
+`
+
+const pageFragment = `
     _id,
     _type,
     name,
@@ -38,18 +58,30 @@ export const getPageQuery = defineQuery(`
     "pageBuilder": pageBuilder[]{
       ...,
       _type == "callToAction" => {
-        ${linkFields},
+        ${linkFields}
+        ${bodyFragment}
+        ${buttonFragment}
       },
       _type == "infoSection" => {
-        content[]{
-          ...,
-          markDefs[]{
-            ...,
-            ${linkReference}
-          }
-        }
+        ${bodyFragment}
       },
+      _type == "announcements" => {
+        announcements[] {
+          ...,
+          ${buttonFragment}
+        }
+      }
     },
+`
+
+export const getHomePageQuery = defineQuery(`
+  *[_type == 'page' && _id == 'homePage'][0]{
+    ${pageFragment}
+  }
+`)
+export const getPageQuery = defineQuery(`
+  *[_type == 'page' && slug.current == $slug][0]{
+    ${pageFragment}
   }
 `)
 
@@ -75,14 +107,8 @@ export const morePostsQuery = defineQuery(`
 
 export const postQuery = defineQuery(`
   *[_type == "post" && slug.current == $slug] [0] {
-    content[]{
-    ...,
-    markDefs[]{
-      ...,
-      ${linkReference}
-    }
-  },
     ${postFields}
+    ${bodyFragment}
   }
 `)
 

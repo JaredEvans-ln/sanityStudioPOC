@@ -8,6 +8,8 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './src/schemaTypes'
 import {structure} from './src/structure'
+import {colorInput} from '@sanity/color-input'
+
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {
   presentationTool,
@@ -47,7 +49,7 @@ function resolveHref(documentType?: string, slug?: string): string | undefined {
 // Main Sanity configuration
 export default defineConfig({
   name: 'default',
-  title: 'Sanity + Next.js Starter Template',
+  title: 'LexisNexis',
 
   projectId,
   dataset,
@@ -126,6 +128,7 @@ export default defineConfig({
     unsplashImageAsset(),
     assist(),
     visionTool(),
+    colorInput(),
   ],
 
   // Schema configuration, imported from ./src/schemaTypes/index.ts

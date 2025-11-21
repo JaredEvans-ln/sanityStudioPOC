@@ -5,6 +5,7 @@ import {urlForImage} from '@/sanity/lib/utils'
 
 interface CoverImageProps {
   image: any
+  attribute: string
   priority?: boolean
 }
 
@@ -12,6 +13,7 @@ export default function CoverImage(props: CoverImageProps) {
   const {image: source, priority} = props
   const image = source?.asset?._ref ? (
     <Image
+      data-sanity={props.attribute}
       className="object-cover"
       width={getImageDimensions(source).width}
       height={getImageDimensions(source).height}

@@ -14,12 +14,12 @@ export const client = createClient({
     studioUrl,
     // Set logger to 'console' for more verbose logging
     // logger: console,
-    filter: (props) => {
-      if (props.sourcePath.at(-1) === 'title') {
-        return true
-      }
+    // filter: (props) => {
+    //   if (props.sourcePath.at(-1) === 'title') {
+    //     return true
+    //   }
 
-      return props.filterDefault(props)
-    },
+    //   return props.filterDefault(props)
+    // },
   },
 })

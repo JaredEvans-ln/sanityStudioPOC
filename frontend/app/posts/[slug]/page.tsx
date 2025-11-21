@@ -10,6 +10,7 @@ import PortableText from '@/app/components/PortableText'
 import {sanityFetch} from '@/sanity/lib/live'
 import {postPagesSlugs, postQuery} from '@/sanity/lib/queries'
 import {resolveOpenGraphImage} from '@/sanity/lib/utils'
+import {createDataAttribute} from 'next-sanity'
 
 type Props = {
   params: Promise<{slug: string}>
@@ -65,6 +66,12 @@ export default async function PostPage(props: Props) {
     return notFound()
   }
 
+  const imgAttr = createDataAttribute({
+    id: post._id,
+    type: 'post',
+    path: 'coverImage',
+  })
+
   return (
     <>
       <div className="">
@@ -83,11 +90,13 @@ export default async function PostPage(props: Props) {
               </div>
             </div>
             <article className="gap-6 grid max-w-4xl">
-              <div className="">
-                {post?.coverImage && <CoverImage image={post.coverImage} priority />}
-              </div>
-              {post.content?.length && (
-                <PortableText className="max-w-2xl" value={post.content as PortableTextBlock[]} />
+              {/* <div className="" data-sanity={imgAttr()}> */}
+              {post?.coverImage && (
+                <CoverImage attribute={imgAttr()} image={post.coverImage} priority />
+              )}
+              {/* </div> */}
+              {post.body?.length && (
+                <PortableText className="max-w-2xl" value={post.body as PortableTextBlock[]} />
               )}
             </article>
           </div>
