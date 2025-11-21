@@ -232,6 +232,39 @@ export type InfoSection = {
   >
 }
 
+export type BlockContentTextOnly = Array<{
+  children?: Array<{
+    marks?: Array<string>
+    text?: string
+    _type: 'span'
+    _key: string
+  }>
+  style?: 'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote'
+  listItem?: 'bullet' | 'number'
+  markDefs?: Array<{
+    linkType?: 'href' | 'page' | 'post'
+    href?: string
+    page?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'page'
+    }
+    post?: {
+      _ref: string
+      _type: 'reference'
+      _weak?: boolean
+      [internalGroqTypeReferenceTo]?: 'post'
+    }
+    openInNewTab?: boolean
+    _type: 'link'
+    _key: string
+  }>
+  level?: number
+  _type: 'block'
+  _key: string
+}>
+
 export type BlockContent = Array<
   | {
       children?: Array<{
@@ -298,8 +331,8 @@ export type ContactForm = {
   _updatedAt: string
   _rev: string
   title: string
-  body?: BlockContent
-  successMessage?: BlockContent
+  body?: BlockContentTextOnly
+  successMessage?: BlockContentTextOnly
   requiredFields: Array<string>
   optionalFields?: Array<string>
 }
@@ -397,8 +430,8 @@ export type Page = {
       } & InfoSection)
     | {
         title: string
-        body?: BlockContent
-        successMessage?: BlockContent
+        body?: BlockContentTextOnly
+        successMessage?: BlockContentTextOnly
         requiredFields: Array<string>
         optionalFields?: Array<string>
         _type: 'contactForm'
@@ -766,6 +799,7 @@ export type AllSanitySchemaTypes =
   | CallToAction
   | Button
   | InfoSection
+  | BlockContentTextOnly
   | BlockContent
   | ContactForm
   | PlanTier
@@ -860,7 +894,7 @@ export type SettingsQueryResult = {
   }
 } | null
 // Variable: getHomePageQuery
-// Query: *[_type == 'page' && _id == 'homePage'][0]{        _id,    _type,    name,    slug,    heading,    subheading,    "pageBuilder": pageBuilder[]{      ...,      _type == "callToAction" => {          link {      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }      },          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },      },      _type == "infoSection" => {          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },      },    },  }
+// Query: *[_type == 'page' && _id == 'homePage'][0]{        _id,    _type,    name,    slug,    heading,    subheading,    "pageBuilder": pageBuilder[]{      ...,      _type == "callToAction" => {          link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }    }  },          button {    ...,      link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },  },      },      _type == "infoSection" => {          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }    }  },      },      _type == "announcements" => {        announcements[] {          ...,            button {    ...,      link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },  },        }      }    },  }
 export type GetHomePageQueryResult = {
   _id: string
   _type: 'page'
@@ -873,11 +907,38 @@ export type GetHomePageQueryResult = {
         _key: string
         _type: 'announcements'
         heading?: string
-        announcements?: Array<
-          {
-            _key: string
-          } & Announcement
-        >
+        announcements: Array<{
+          _key: string
+          _type: 'announcement'
+          category?: 'events' | 'press_releases' | 'stories'
+          title?: string
+          summary?: string
+          button: {
+            _type: 'button'
+            buttonText?: string
+            link: {
+              _type: 'link'
+              linkType?: 'href' | 'page' | 'post'
+              href?: string
+              page: string | '/'
+              post: string | null
+              openInNewTab?: boolean
+            } | null
+          } | null
+          image?: {
+            asset?: {
+              _ref: string
+              _type: 'reference'
+              _weak?: boolean
+              [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+            }
+            media?: unknown
+            hotspot?: SanityImageHotspot
+            crop?: SanityImageCrop
+            _type: 'image'
+          }
+          date?: string
+        }> | null
       }
     | {
         _key: string
@@ -909,7 +970,7 @@ export type GetHomePageQueryResult = {
               markDefs: Array<{
                 linkType?: 'href' | 'page' | 'post'
                 href?: string
-                page: string | null
+                page: string | '/'
                 post: string | null
                 openInNewTab?: boolean
                 _type: 'link'
@@ -963,7 +1024,18 @@ export type GetHomePageQueryResult = {
               markDefs: null
             }
         > | null
-        button?: Button
+        button: {
+          _type: 'button'
+          buttonText?: string
+          link: {
+            _type: 'link'
+            linkType?: 'href' | 'page' | 'post'
+            href?: string
+            page: string | '/'
+            post: string | null
+            openInNewTab?: boolean
+          } | null
+        } | null
         image?: {
           asset?: {
             _ref: string
@@ -991,8 +1063,8 @@ export type GetHomePageQueryResult = {
       }
     | {
         title: string
-        body?: BlockContent
-        successMessage?: BlockContent
+        body?: BlockContentTextOnly
+        successMessage?: BlockContentTextOnly
         requiredFields: Array<string>
         optionalFields?: Array<string>
         _type: 'contactForm'
@@ -1028,7 +1100,7 @@ export type GetHomePageQueryResult = {
               markDefs: Array<{
                 linkType?: 'href' | 'page' | 'post'
                 href?: string
-                page: string | null
+                page: string | '/'
                 post: string | null
                 openInNewTab?: boolean
                 _type: 'link'
@@ -1086,7 +1158,7 @@ export type GetHomePageQueryResult = {
   > | null
 } | null
 // Variable: getPageQuery
-// Query: *[_type == 'page' && slug.current == $slug][0]{        _id,    _type,    name,    slug,    heading,    subheading,    "pageBuilder": pageBuilder[]{      ...,      _type == "callToAction" => {          link {      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }      },          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },      },      _type == "infoSection" => {          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },      },    },  }
+// Query: *[_type == 'page' && slug.current == $slug][0]{        _id,    _type,    name,    slug,    heading,    subheading,    "pageBuilder": pageBuilder[]{      ...,      _type == "callToAction" => {          link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }    }  },          button {    ...,      link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },  },      },      _type == "infoSection" => {          body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }    }  },      },      _type == "announcements" => {        announcements[] {          ...,            button {    ...,      link {      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }      },  },        }      }    },  }
 export type GetPageQueryResult = {
   _id: string
   _type: 'page'
@@ -1099,11 +1171,38 @@ export type GetPageQueryResult = {
         _key: string
         _type: 'announcements'
         heading?: string
-        announcements?: Array<
-          {
-            _key: string
-          } & Announcement
-        >
+        announcements: Array<{
+          _key: string
+          _type: 'announcement'
+          category?: 'events' | 'press_releases' | 'stories'
+          title?: string
+          summary?: string
+          button: {
+            _type: 'button'
+            buttonText?: string
+            link: {
+              _type: 'link'
+              linkType?: 'href' | 'page' | 'post'
+              href?: string
+              page: string | '/'
+              post: string | null
+              openInNewTab?: boolean
+            } | null
+          } | null
+          image?: {
+            asset?: {
+              _ref: string
+              _type: 'reference'
+              _weak?: boolean
+              [internalGroqTypeReferenceTo]?: 'sanity.imageAsset'
+            }
+            media?: unknown
+            hotspot?: SanityImageHotspot
+            crop?: SanityImageCrop
+            _type: 'image'
+          }
+          date?: string
+        }> | null
       }
     | {
         _key: string
@@ -1135,7 +1234,7 @@ export type GetPageQueryResult = {
               markDefs: Array<{
                 linkType?: 'href' | 'page' | 'post'
                 href?: string
-                page: string | null
+                page: string | '/'
                 post: string | null
                 openInNewTab?: boolean
                 _type: 'link'
@@ -1189,7 +1288,18 @@ export type GetPageQueryResult = {
               markDefs: null
             }
         > | null
-        button?: Button
+        button: {
+          _type: 'button'
+          buttonText?: string
+          link: {
+            _type: 'link'
+            linkType?: 'href' | 'page' | 'post'
+            href?: string
+            page: string | '/'
+            post: string | null
+            openInNewTab?: boolean
+          } | null
+        } | null
         image?: {
           asset?: {
             _ref: string
@@ -1217,8 +1327,8 @@ export type GetPageQueryResult = {
       }
     | {
         title: string
-        body?: BlockContent
-        successMessage?: BlockContent
+        body?: BlockContentTextOnly
+        successMessage?: BlockContentTextOnly
         requiredFields: Array<string>
         optionalFields?: Array<string>
         _type: 'contactForm'
@@ -1254,7 +1364,7 @@ export type GetPageQueryResult = {
               markDefs: Array<{
                 linkType?: 'href' | 'page' | 'post'
                 href?: string
-                page: string | null
+                page: string | '/'
                 post: string | null
                 openInNewTab?: boolean
                 _type: 'link'
@@ -1406,7 +1516,7 @@ export type MorePostsQueryResult = Array<{
   } | null
 }>
 // Variable: postQuery
-// Query: *[_type == "post" && slug.current == $slug] [0] {      _id,  "status": select(_originalId in path("drafts.**") => "draft", "published"),  "title": coalesce(title, "Untitled"),  "slug": slug.current,  excerpt,  coverImage,  "date": coalesce(date, _updatedAt),  "author": author->{firstName, lastName, picture},      body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },  }
+// Query: *[_type == "post" && slug.current == $slug] [0] {      _id,  "status": select(_originalId in path("drafts.**") => "draft", "published"),  "title": coalesce(title, "Untitled"),  "slug": slug.current,  excerpt,  coverImage,  "date": coalesce(date, _updatedAt),  "author": author->{firstName, lastName, picture},      body[]{    ...,    _type == 'reference' => @->,    _type == 'quote' => {      ...,       attributedTo->{...}    },    markDefs[]{      ...,        _type == "link" => {    "page": coalesce(page->slug.current, '/'),    "post": post->slug.current  }    }  },  }
 export type PostQueryResult = {
   _id: string
   status: 'draft' | 'published'
@@ -1469,7 +1579,7 @@ export type PostQueryResult = {
         markDefs: Array<{
           linkType?: 'href' | 'page' | 'post'
           href?: string
-          page: string | null
+          page: string | '/'
           post: string | null
           openInNewTab?: boolean
           _type: 'link'
@@ -1540,12 +1650,12 @@ import '@sanity/client'
 declare module '@sanity/client' {
   interface SanityQueries {
     '*[_type == "settings"][0]': SettingsQueryResult
-    '\n  *[_type == \'page\' && _id == \'homePage\'][0]{\n    \n    _id,\n    _type,\n    name,\n    slug,\n    heading,\n    subheading,\n    "pageBuilder": pageBuilder[]{\n      ...,\n      _type == "callToAction" => {\n        \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n      },\n\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n      _type == "infoSection" => {\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n    },\n\n  }\n': GetHomePageQueryResult
-    '\n  *[_type == \'page\' && slug.current == $slug][0]{\n    \n    _id,\n    _type,\n    name,\n    slug,\n    heading,\n    subheading,\n    "pageBuilder": pageBuilder[]{\n      ...,\n      _type == "callToAction" => {\n        \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n      },\n\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n      _type == "infoSection" => {\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n    },\n\n  }\n': GetPageQueryResult
+    '\n  *[_type == \'page\' && _id == \'homePage\'][0]{\n    \n    _id,\n    _type,\n    name,\n    slug,\n    heading,\n    subheading,\n    "pageBuilder": pageBuilder[]{\n      ...,\n      _type == "callToAction" => {\n        \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n        \n  button {\n    ...,\n    \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n  },\n\n      },\n      _type == "infoSection" => {\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n      _type == "announcements" => {\n        announcements[] {\n          ...,\n          \n  button {\n    ...,\n    \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n  },\n\n        }\n      }\n    },\n\n  }\n': GetHomePageQueryResult
+    '\n  *[_type == \'page\' && slug.current == $slug][0]{\n    \n    _id,\n    _type,\n    name,\n    slug,\n    heading,\n    subheading,\n    "pageBuilder": pageBuilder[]{\n      ...,\n      _type == "callToAction" => {\n        \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n        \n  button {\n    ...,\n    \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n  },\n\n      },\n      _type == "infoSection" => {\n        \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n      },\n      _type == "announcements" => {\n        announcements[] {\n          ...,\n          \n  button {\n    ...,\n    \n  link {\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n      },\n\n  },\n\n        }\n      }\n    },\n\n  }\n': GetPageQueryResult
     '\n  *[_type == "page" || _type == "post" && defined(slug.current)] | order(_type asc) {\n    "slug": slug.current,\n    _type,\n    _updatedAt,\n  }\n': SitemapDataResult
     '\n  *[_type == "post" && defined(slug.current)] | order(date desc, _updatedAt desc) {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n\n  }\n': AllPostsQueryResult
     '\n  *[_type == "post" && _id != $skip && defined(slug.current)] | order(date desc, _updatedAt desc) [0...$limit] {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n\n  }\n': MorePostsQueryResult
-    '\n  *[_type == "post" && slug.current == $slug] [0] {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n\n    \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": page->slug.current,\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n  }\n': PostQueryResult
+    '\n  *[_type == "post" && slug.current == $slug] [0] {\n    \n  _id,\n  "status": select(_originalId in path("drafts.**") => "draft", "published"),\n  "title": coalesce(title, "Untitled"),\n  "slug": slug.current,\n  excerpt,\n  coverImage,\n  "date": coalesce(date, _updatedAt),\n  "author": author->{firstName, lastName, picture},\n\n    \n  body[]{\n    ...,\n    _type == \'reference\' => @->,\n    _type == \'quote\' => {\n      ..., \n      attributedTo->{...}\n    },\n    markDefs[]{\n      ...,\n      \n  _type == "link" => {\n    "page": coalesce(page->slug.current, \'/\'),\n    "post": post->slug.current\n  }\n\n    }\n  },\n\n  }\n': PostQueryResult
     '\n  *[_type == "post" && defined(slug.current)]\n  {"slug": slug.current}\n': PostPagesSlugsResult
     '\n  *[_type == "page" && defined(slug.current)]\n  {"slug": slug.current}\n': PagesSlugsResult
   }
